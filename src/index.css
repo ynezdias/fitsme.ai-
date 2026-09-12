@@ -2,6 +2,14 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+.uploaded-preview { display: block; width: min(100%, 420px); max-height: 440px; object-fit: contain; margin: 22px 0; border-radius: 18px; background: #efe8df; }
+.image-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 26px 0; }
+.image-compare figure { margin: 0; position: relative; overflow: hidden; border-radius: 18px; background: #efe8df; }
+.image-compare img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+.image-compare figcaption { padding: 10px 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.error-banner { max-width: 720px; margin: 14px auto; padding: 12px 16px; color: #8f1d25; background: #fff0f0; border-radius: 10px; }
+@media (max-width: 640px) { .image-compare { grid-template-columns: 1fr; } }
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
