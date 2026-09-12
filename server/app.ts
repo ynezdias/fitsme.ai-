@@ -5,7 +5,6 @@ import { requestLogger } from "./middleware/request-logger.js";
 import { healthRouter } from "./routes/health.route.js";
 import { mirrorRouter } from "./routes/mirror.route.js";
 import { transformRouter } from "./routes/transform.route.js";
-import { videoRouter } from "./routes/video.route.js";
 
 const configuredOrigin = process.env.FRONTEND_ORIGIN;
 const isProduction = process.env.NODE_ENV === "production";
@@ -16,6 +15,5 @@ if (!isProduction) app.use(requestLogger);
 app.use("/api", healthRouter);
 app.use("/api/mirror", mirrorRouter);
 app.use("/api/mirror", transformRouter);
-app.use("/api/video", videoRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);

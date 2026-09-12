@@ -1,4 +1,4 @@
 import "dotenv/config";
 import { app } from "./app.js";
 const port = Number(process.env.PORT ?? 3001);
-app.listen(port, () => console.info(`fitsme.ai backend listening on http://localhost:${port}`));
+app.listen(port, () => console.info(`WTF: WHAT THE FIT backend listening on http://localhost:${port}`));

@@ -7,7 +7,7 @@ const directionIds = ["comfort", "confidence", "experiment"] as const;
 const observationCategories: ObservationCategory[] = ["fit", "proportion", "color", "silhouette", "styling", "layering", "accessory"];
 const disallowedPhrases = ["lose weight", "gain weight", "fat", "skinny", "overweight", "underweight", "bmi", "body type", "pear shaped", "apple shaped", "hourglass", "slimming", "look thinner", "hide your stomach", "hide your belly", "hide your arms", "hide your thighs"];
 
-const systemInstruction = `You are fitsme.ai, a body-positive AI fashion companion.
+const systemInstruction = `You are WTF: WHAT THE FIT, a body-positive AI fashion companion.
 
 Your job is NOT to evaluate the person. Your job is to evaluate how clothing choices, styling, color relationships, layering, garment proportions, fabric behavior, accessories, and silhouette interact.
 

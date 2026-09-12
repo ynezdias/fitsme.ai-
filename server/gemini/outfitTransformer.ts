@@ -14,7 +14,7 @@ const directionGuidance: Record<StyleDirectionId, string> = {
   experiment: "Aim for expressive, fashion-forward styling through contrast, layering, clothing-created silhouette, accessories, color blocking, or texture. Keep the changes realistic unless explicitly requested."
 };
 
-const transformationPrompt = (direction: StyleDirectionId, changes: string[]): string => `You are the visual styling engine for fitsme.ai.
+const transformationPrompt = (direction: StyleDirectionId, changes: string[]): string => `You are the visual styling engine for WTF: WHAT THE FIT.
 
 Edit the provided image by modifying ONLY the clothing, styling, accessories, layering, colors, or garment silhouette described below. Preserve the person completely.
 
