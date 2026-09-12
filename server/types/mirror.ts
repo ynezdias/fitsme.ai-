@@ -6,7 +6,8 @@ export type SupportedImageMimeType = (typeof supportedImageMimeTypes)[number];
 export interface MirrorAnalysisRequest { image: string; mimeType?: SupportedImageMimeType; concern: ConcernType; }
 export interface MirrorImageInput { data: string; mimeType: SupportedImageMimeType; }
 export interface StyleRecommendation { changes: string[]; }
-export interface StyleDirection extends StyleRecommendation { id: "comfort" | "confidence" | "experiment"; name: string; description: string; }
+export type StyleDirectionId = "comfort" | "confidence" | "experiment";
+export interface StyleDirection extends StyleRecommendation { id: StyleDirectionId; name: string; description: string; }
 export type ObservationCategory = "fit" | "proportion" | "color" | "silhouette" | "styling" | "layering" | "accessory";
 export interface MirrorObservation { category: ObservationCategory; text: string; }
 export interface GeminiMirrorAnalysis {
@@ -20,4 +21,25 @@ export interface MirrorAnalysisResponse {
   analysis: GeminiMirrorAnalysis;
   styleDirections: StyleDirection[];
   guardrails: { bodyJudgment: false; bodyModification: false; weightEstimation: false; };
+}
+
+export interface TransformRequest {
+  image: string;
+  mimeType?: SupportedImageMimeType;
+  direction: StyleDirectionId;
+  changes: string[];
+}
+
+export interface TransformResponse {
+  success: true;
+  transformation: {
+    direction: StyleDirectionId;
+    image: string;
+    changesApplied: string[];
+    message: "Same you. Different styling.";
+  };
+  guardrails: {
+    bodyModified: false;
+    identityModified: false;
+  };
 }

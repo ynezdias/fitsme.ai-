@@ -104,6 +104,35 @@ Invalid requests receive a predictable error:
 - Errors do not expose stack traces or secret values.
 - Gemini is instructed and post-validated to discuss garments and styling—not attractiveness, body size, measurements, body type, weight, health, age, ethnicity, or body modification. Unsafe or malformed model output is replaced by a neutral styling fallback.
 
+## Transform endpoint
+
+### `POST /api/mirror/transform`
+
+Creates a visual outfit transformation after a user selects one of the analysis directions: `comfort`, `confidence`, or `experiment`.
+
+```powershell
+curl.exe -X POST http://localhost:3001/api/mirror/transform `
+  -H "Content-Type: application/json" `
+  -d "{\"image\":\"data:image/jpeg;base64,REPLACE_WITH_REAL_BASE64\",\"direction\":\"confidence\",\"changes\":[\"Add a structured outer layer\",\"Create clearer contrast between top and bottom\",\"Add one statement accessory\"]}"
+```
+
+The request accepts JPEG, PNG, and WebP images up to 6 MB decoded. `changes` must contain one to six non-empty styling changes from the prior analysis response.
+
+```json
+{
+  "success": true,
+  "transformation": {
+    "direction": "confidence",
+    "image": "data:image/png;base64,...",
+    "changesApplied": ["Add a structured outer layer"],
+    "message": "Same you. Different styling."
+  },
+  "guardrails": { "bodyModified": false, "identityModified": false }
+}
+```
+
+Gemini is instructed to preserve the person’s identity and body while modifying styling only. These guardrails declare the intended generation constraints; they are not a mathematical verification of identity or body preservation. Transformation errors return `TRANSFORMATION_FAILED`, and a 45-second provider timeout returns `AI_TIMEOUT`; the frontend can continue displaying the textual recommendations.
+
 ## Troubleshooting
 
 - `AI_NOT_CONFIGURED`: set `GEMINI_API_KEY` in the server's `.env`, then restart the server.
