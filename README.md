@@ -1,18 +1,33 @@
-# fitsme.ai
+# WTF: WHAT THE FIT
 
-Backend foundation for **fitsme.ai**, a fashion experimentation product built on the principle: *Your body doesn't need an algorithm.* The service focuses on clothing, styling, comfort, and personal expression; it does not assess or modify bodies.
+**Your body doesn't need an algorithm.**
+
+WTF is an AI fashion experience built around a simple question: *What if the thing you dislike isn't your body — but how the outfit is working?*
+
+Users upload an outfit photo, tell WTF what feels wrong, and receive Gemini guidance about styling variables rather than physical appearance. They can then explore Comfort, Confidence, and Experiment, and generate an alternate version of the outfit while keeping themselves as the constant.
 
 ## Architecture
 
-The existing frontend (if present) remains in `src/`. This Node.js + TypeScript Express backend is isolated in `server/`:
+```text
+Frontend
+  |
+  v
+Node.js / Express
+  |
+  v
+Google Gemini
+  |-- Outfit Analysis
+  `-- Outfit Transformation
+```
 
-- `server/routes` — API endpoints
-- `server/services` — application logic and current mock analysis
-- `server/middleware` — logging and predictable error responses
-- `server/types` — reusable API contracts
-- `server/gemini` and `server/vonage` — reserved for future integrations
+The backend is isolated in `server/`. The frontend, if present, remains untouched in `src/`.
 
-Gemini analyzes outfit images in this phase. Vonage remains deliberately unintegrated.
+## Technology
+
+- React and Lovable (frontend)
+- TypeScript
+- Node.js and Express
+- Google Gemini
 
 ## Backend setup
 
@@ -39,9 +54,7 @@ GEMINI_API_KEY=your_server_only_gemini_key
 | `PORT` | Backend port, default `3001` |
 | `NODE_ENV` | Runtime environment |
 | `FRONTEND_ORIGIN` | Allowed frontend origin for CORS |
-| `GEMINI_API_KEY` | Required server-only key for Gemini outfit analysis |
-| `VONAGE_APPLICATION_ID` | Reserved for a future phase |
-| `VONAGE_PRIVATE_KEY` | Reserved for a future phase |
+| `GEMINI_API_KEY` | Required server-only key for Gemini analysis and transformation |
 
 ## Development commands
 
@@ -55,7 +68,7 @@ npm run typecheck   # TypeScript validation
 ### `GET /api/health`
 
 ```json
-{"success":true,"service":"fitsme.ai backend","status":"healthy"}
+{"success":true,"service":"WTF: WHAT THE FIT backend","status":"healthy"}
 ```
 
 ### `POST /api/mirror/analyze`
@@ -133,55 +146,6 @@ The request accepts JPEG, PNG, and WebP images up to 6 MB decoded. `changes` mus
 
 Gemini is instructed to preserve the person’s identity and body while modifying styling only. These guardrails declare the intended generation constraints; they are not a mathematical verification of identity or body preservation. Transformation errors return `TRANSFORMATION_FAILED`, and a 45-second provider timeout returns `AI_TIMEOUT`; the frontend can continue displaying the textual recommendations.
 
-## Ask My Person
-
-Ask My Person creates a temporary, live 1-to-1 Vonage Video room. fitsme.ai creates the session and server-side token; it does not enable archives or recordings, and it does not store rooms or call history. Frontend privacy copy: **“Your video call is temporary and isn't recorded by fitsme.ai.”**
-
-Create a Vonage Application in the Vonage Dashboard, enable its Video capability, and generate its public/private key pair. Set these server-only values in `.env`:
-
-```env
-VONAGE_APPLICATION_ID=your_vonage_application_id
-VONAGE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
-# Or, instead of VONAGE_PRIVATE_KEY:
-VONAGE_PRIVATE_KEY_PATH=C:\secure-path\private.key
-```
-
-Never expose the private key via React/Vite/Lovable variables (including `VITE_*`). The application ID and short-lived token are client-safe connection credentials.
-
-### `POST /api/video/session`
-
-Creates a temporary video room; no request body is needed.
-
-```powershell
-curl.exe -X POST http://localhost:3001/api/video/session
-```
-
-```json
-{"success":true,"room":{"sessionId":"vonage-session-id","applicationId":"vonage-application-id"}}
-```
-
-### `POST /api/video/token`
-
-Generates a publisher token that expires in one hour. Both people should request their own token for the same session ID.
-
-```powershell
-curl.exe -X POST http://localhost:3001/api/video/token `
-  -H "Content-Type: application/json" `
-  -d "{\"sessionId\":\"vonage-session-id\",\"role\":\"publisher\"}"
-```
-
-```json
-{"success":true,"credentials":{"applicationId":"vonage-application-id","sessionId":"vonage-session-id","token":"short-lived-vonage-token"}}
-```
-
-### Frontend connection flow
-
-1. Call `/api/video/session`, then share the returned session ID in the invite URL, for example `${frontendBaseUrl}/person?session=${encodeURIComponent(sessionId)}`.
-2. For each participant, call `/api/video/token` with that session ID.
-3. Use the Vonage Video JavaScript SDK: `OT.initSession(applicationId, sessionId)`, listen for `streamCreated`, then `session.connect(token)`, initialize/publish the local camera and microphone, and subscribe to remote streams.
-4. Present permission, connecting, connected, waiting-for-friend, friend-joined, disconnected, and error states. Provide microphone, camera, and leave controls only.
-
-Troubleshooting: `VIDEO_NOT_CONFIGURED` means the application ID and either private-key value are missing. `VIDEO_SESSION_FAILED` and `VIDEO_TOKEN_FAILED` are safe provider failures. Ensure the Vonage application has Video enabled and that the browser uses the Vonage/OpenTok client SDK.
 
 ## Troubleshooting
 

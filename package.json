@@ -1,9 +1,10 @@
 {
-  "name": "fitsme-ai",
+  "name": "wtf-what-the-fit",
   "version": "0.1.0",
   "private": true,
-  "description": "Backend foundation for fitsme.ai",
+  "description": "Backend for WTF: WHAT THE FIT",
   "scripts": {
+    "dev": "vite --host 0.0.0.0",
     "server": "tsx watch server/index.ts",
     "start": "node dist/server/index.js",
     "build": "tsc --noEmit",
@@ -14,17 +15,25 @@
   },
   "dependencies": {
     "@google/genai": "^1.40.0",
-    "@vonage/auth": "^1.17.0",
-    "@vonage/video": "^1.30.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.29",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@tailwindcss/vite": "^4.0.0",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "tailwindcss": "^4.0.0",
+    "tw-animate-css": "^1.3.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.1"
   }
 }
