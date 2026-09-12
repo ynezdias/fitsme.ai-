@@ -1,11 +1,23 @@
 export const concernTypes = ["fit", "colors", "silhouette", "styling", "something_off", "dont_know", "body"] as const;
 export type ConcernType = (typeof concernTypes)[number];
-export interface MirrorAnalysisRequest { image: string; concern: ConcernType; }
+export const supportedImageMimeTypes = ["image/jpeg", "image/png", "image/webp"] as const;
+export type SupportedImageMimeType = (typeof supportedImageMimeTypes)[number];
+
+export interface MirrorAnalysisRequest { image: string; mimeType?: SupportedImageMimeType; concern: ConcernType; }
+export interface MirrorImageInput { data: string; mimeType: SupportedImageMimeType; }
 export interface StyleRecommendation { changes: string[]; }
 export interface StyleDirection extends StyleRecommendation { id: "comfort" | "confidence" | "experiment"; name: string; description: string; }
+export type ObservationCategory = "fit" | "proportion" | "color" | "silhouette" | "styling" | "layering" | "accessory";
+export interface MirrorObservation { category: ObservationCategory; text: string; }
+export interface GeminiMirrorAnalysis {
+  summary: string;
+  observations: MirrorObservation[];
+  reframe: string;
+  bodyModificationSuggested: false;
+}
 export interface MirrorAnalysisResponse {
   success: true;
-  analysis: { summary: string; observations: string[]; };
+  analysis: GeminiMirrorAnalysis;
   styleDirections: StyleDirection[];
   guardrails: { bodyJudgment: false; bodyModification: false; weightEstimation: false; };
 }

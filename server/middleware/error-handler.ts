@@ -13,6 +13,11 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     res.status(error.statusCode).json(response);
     return;
   }
+  if (typeof error === "object" && error !== null && "type" in error && error.type === "entity.too.large") {
+    const response: ApiErrorResponse = { success: false, error: { code: "PAYLOAD_TOO_LARGE", message: "Request payload is too large." } };
+    res.status(413).json(response);
+    return;
+  }
   if (error instanceof SyntaxError && "body" in error) {
     const response: ApiErrorResponse = { success: false, error: { code: "INVALID_JSON", message: "Request body must be valid JSON." } };
     res.status(400).json(response);
