@@ -13,7 +13,7 @@ const getVideoClient = (): { applicationId: string; video: Video } => {
   const privateKey = process.env.VONAGE_PRIVATE_KEY?.replace(/\\n/g, "\n").trim() || process.env.VONAGE_PRIVATE_KEY_PATH?.trim();
   if (!applicationId || !privateKey) throw new VideoConfigurationError("Vonage Video credentials are not configured.");
   const credentials = new Auth({ applicationId, privateKey });
-  return { applicationId, video: new Video(credentials) };
+  return { applicationId, video: new Video(credentials, {}) };
 };
 
 export const createVideoSession = async (): Promise<VideoRoomResponse> => {
