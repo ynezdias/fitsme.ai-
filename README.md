@@ -133,6 +133,56 @@ The request accepts JPEG, PNG, and WebP images up to 6 MB decoded. `changes` mus
 
 Gemini is instructed to preserve the person’s identity and body while modifying styling only. These guardrails declare the intended generation constraints; they are not a mathematical verification of identity or body preservation. Transformation errors return `TRANSFORMATION_FAILED`, and a 45-second provider timeout returns `AI_TIMEOUT`; the frontend can continue displaying the textual recommendations.
 
+## Ask My Person
+
+Ask My Person creates a temporary, live 1-to-1 Vonage Video room. fitsme.ai creates the session and server-side token; it does not enable archives or recordings, and it does not store rooms or call history. Frontend privacy copy: **“Your video call is temporary and isn't recorded by fitsme.ai.”**
+
+Create a Vonage Application in the Vonage Dashboard, enable its Video capability, and generate its public/private key pair. Set these server-only values in `.env`:
+
+```env
+VONAGE_APPLICATION_ID=your_vonage_application_id
+VONAGE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+# Or, instead of VONAGE_PRIVATE_KEY:
+VONAGE_PRIVATE_KEY_PATH=C:\secure-path\private.key
+```
+
+Never expose the private key via React/Vite/Lovable variables (including `VITE_*`). The application ID and short-lived token are client-safe connection credentials.
+
+### `POST /api/video/session`
+
+Creates a temporary video room; no request body is needed.
+
+```powershell
+curl.exe -X POST http://localhost:3001/api/video/session
+```
+
+```json
+{"success":true,"room":{"sessionId":"vonage-session-id","applicationId":"vonage-application-id"}}
+```
+
+### `POST /api/video/token`
+
+Generates a publisher token that expires in one hour. Both people should request their own token for the same session ID.
+
+```powershell
+curl.exe -X POST http://localhost:3001/api/video/token `
+  -H "Content-Type: application/json" `
+  -d "{\"sessionId\":\"vonage-session-id\",\"role\":\"publisher\"}"
+```
+
+```json
+{"success":true,"credentials":{"applicationId":"vonage-application-id","sessionId":"vonage-session-id","token":"short-lived-vonage-token"}}
+```
+
+### Frontend connection flow
+
+1. Call `/api/video/session`, then share the returned session ID in the invite URL, for example `${frontendBaseUrl}/person?session=${encodeURIComponent(sessionId)}`.
+2. For each participant, call `/api/video/token` with that session ID.
+3. Use the Vonage Video JavaScript SDK: `OT.initSession(applicationId, sessionId)`, listen for `streamCreated`, then `session.connect(token)`, initialize/publish the local camera and microphone, and subscribe to remote streams.
+4. Present permission, connecting, connected, waiting-for-friend, friend-joined, disconnected, and error states. Provide microphone, camera, and leave controls only.
+
+Troubleshooting: `VIDEO_NOT_CONFIGURED` means the application ID and either private-key value are missing. `VIDEO_SESSION_FAILED` and `VIDEO_TOKEN_FAILED` are safe provider failures. Ensure the Vonage application has Video enabled and that the browser uses the Vonage/OpenTok client SDK.
+
 ## Troubleshooting
 
 - `AI_NOT_CONFIGURED`: set `GEMINI_API_KEY` in the server's `.env`, then restart the server.
