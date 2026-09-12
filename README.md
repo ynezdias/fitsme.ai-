@@ -1,155 +1,223 @@
-# WTF: WHAT THE FIT
+# WTF — What The Fit
 
-**Your body doesn't need an algorithm.**
+> Your body does not need an algorithm. Sometimes it is not you—it is just the fit.
 
-WTF is an AI fashion experience built around a simple question: *What if the thing you dislike isn't your body — but how the outfit is working?*
+WTF is a body-positive AI styling experience that helps people understand why an outfit may feel wrong without criticizing their body. Users capture an outfit, choose what feels off, receive clothing-focused feedback from Google Gemini, explore three styling directions, and generate a visual restyle that keeps the person unchanged.
 
-Users upload an outfit photo, tell WTF what feels wrong, and receive Gemini guidance about styling variables rather than physical appearance. They can then explore Comfort, Confidence, and Experiment, and generate an alternate version of the outfit while keeping themselves as the constant.
+## Why it matters
+
+Most fashion tools optimize bodies toward a narrow ideal. WTF changes the question from “What is wrong with me?” to “What can I change about the clothes?” The experience focuses on practical variables such as fit, proportion, color, layering, fabric behavior, accessories, and garment silhouette.
+
+## Key features
+
+- Camera-based outfit capture directly in the browser
+- AI outfit analysis powered by Google Gemini
+- Seven concern paths: fit, colors, silhouette, styling, something feels off, uncertainty, and body discomfort
+- Three actionable directions: Comfort, Confidence, and Experiment
+- AI-generated before-and-after outfit visualization
+- Explicit guardrails against body judgment, weight estimation, and body-modification advice
+- Responsive editorial interface with clear loading and error states
+- In-memory image processing; uploaded images are not saved by the application
+
+## User journey
+
+1. Capture an outfit photo.
+2. Select what feels off about the look.
+3. Receive a supportive, clothing-centered analysis.
+4. Compare three styling directions.
+5. Generate a restyled image while preserving identity and body.
+6. Review the original and transformed outfits side by side.
+
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 18, TypeScript, Vite |
+| Styling | Tailwind CSS, custom CSS |
+| UI | Lucide React and reusable UI components |
+| Backend | Node.js, Express 5, TypeScript |
+| AI | Google Gemini through `@google/genai` |
+| Development | tsx, npm |
 
 ## Architecture
 
 ```text
-Frontend
-  |
-  v
-Node.js / Express
-  |
-  v
-Google Gemini
-  |-- Outfit Analysis
-  `-- Outfit Transformation
+Browser camera / uploaded image
+            |
+            v
+      React + Vite UI
+            |
+            | POST /api/mirror/analyze
+            | POST /api/mirror/transform
+            v
+      Express API server
+            |
+            v
+       Google Gemini
+       |           |
+       |           +-- outfit image transformation
+       +-------------- structured outfit analysis
 ```
 
-The backend is isolated in `server/`. The frontend, if present, remains untouched in `src/`.
+The Vite development server runs on port `5173` and proxies `/api` requests to the Express server on port `3001`.
 
-## Technology
+## Local setup
 
-- React and Lovable (frontend)
-- TypeScript
-- Node.js and Express
-- Google Gemini
+### Prerequisites
 
-## Backend setup
+- Node.js 20 or newer
+- npm
+- A Gemini API key from Google AI Studio
+- A browser with camera permission
 
-Requires Node.js 20+.
+### Installation
 
 ```powershell
+git clone <your-repository-url>
+cd fitsme.ai-
 npm install
 Copy-Item .env.example .env
+```
+
+Open `.env` and add your private Gemini key:
+
+```env
+PORT=3001
+NODE_ENV=development
+FRONTEND_ORIGIN=http://localhost:5173
+GEMINI_API_KEY=your_private_gemini_api_key
+```
+
+Never commit `.env` or paste a live API key into `.env.example`. The repository ignores private environment files.
+
+### Run the application
+
+Start the backend in the first terminal:
+
+```powershell
 npm run server
 ```
 
-The local server listens on `http://localhost:3001` by default. Configure `FRONTEND_ORIGIN` in `.env` for the Lovable development URL (default: `http://localhost:5173`).
+Start the frontend in a second terminal:
 
-To enable outfit analysis, add a Gemini API key to `.env`:
-
-```env
-GEMINI_API_KEY=your_server_only_gemini_key
+```powershell
+npm run dev
 ```
 
-## Environment variables
+Open `http://localhost:5173`. The API health check is available at `http://localhost:3001/api/health`.
 
-| Variable | Purpose |
+## Available scripts
+
+| Command | Purpose |
 | --- | --- |
-| `PORT` | Backend port, default `3001` |
-| `NODE_ENV` | Runtime environment |
-| `FRONTEND_ORIGIN` | Allowed frontend origin for CORS |
-| `GEMINI_API_KEY` | Required server-only key for Gemini analysis and transformation |
+| `npm run dev` | Start the Vite frontend development server |
+| `npm run server` | Start the Express API with file watching |
+| `npm run typecheck` | Run TypeScript validation |
+| `npm run build` | Validate the TypeScript project |
+| `npm start` | Run a previously compiled production server |
 
-## Development commands
+## API overview
 
-```powershell
-npm run server      # start with file watching
-npm run typecheck   # TypeScript validation
+### Health check
+
+```http
+GET /api/health
 ```
-
-## API
-
-### `GET /api/health`
-
-```json
-{"success":true,"service":"WTF: WHAT THE FIT backend","status":"healthy"}
-```
-
-### `POST /api/mirror/analyze`
-
-Accepted `concern` values: `fit`, `colors`, `silhouette`, `styling`, `something_off`, `dont_know`, `body`. Images may be a base64 string with an explicit `mimeType`, or a data URL. JPEG, PNG, and WebP are supported; decoded images are limited to 6 MB.
-
-```powershell
-curl.exe -X POST http://localhost:3001/api/mirror/analyze `
-  -H "Content-Type: application/json" `
-  -d "{\"image\":\"data:image/jpeg;base64,REPLACE_WITH_REAL_BASE64\",\"concern\":\"fit\"}"
-```
-
-The result contains `analysis` (including structured outfit observations and a reframe), three `styleDirections`, and explicit safety guardrails. Images are sent in memory to Gemini and are neither saved to disk nor logged.
-
-Example successful response (content varies by outfit):
 
 ```json
 {
   "success": true,
-  "analysis": {
-    "summary": "The feeling may be coming more from how the pieces interact than from you.",
-    "observations": [{ "category": "proportion", "text": "The garment lengths create competing visual lines." }],
-    "reframe": "Styling variables are worth experimenting with before placing the feeling on your body.",
-    "bodyModificationSuggested": false
-  },
-  "styleDirections": [
-    { "id": "comfort", "name": "Comfort", "description": "Keep the outfit easy.", "changes": ["Try a softer layer."] },
-    { "id": "confidence", "name": "Confidence", "description": "Create a clear focal point.", "changes": ["Add one structured piece."] },
-    { "id": "experiment", "name": "Experiment", "description": "Try a different styling direction.", "changes": ["Introduce a contrasting layer."] }
-  ],
-  "guardrails": { "bodyJudgment": false, "bodyModification": false, "weightEstimation": false }
+  "service": "WTF: WHAT THE FIT backend",
+  "status": "healthy"
 }
 ```
 
-Invalid requests receive a predictable error:
+### Analyze an outfit
 
-```json
-{"success":false,"error":{"code":"INVALID_REQUEST","message":"A valid image is required."}}
+```http
+POST /api/mirror/analyze
+Content-Type: application/json
 ```
-
-## Security notes
-
-- `.env` files and secrets are ignored by Git.
-- Request logs record method, route, status, and duration only—never body data or images.
-- CORS defaults to the local frontend in development and denies cross-origin browser access in production until `FRONTEND_ORIGIN` is configured.
-- Errors do not expose stack traces or secret values.
-- Gemini is instructed and post-validated to discuss garments and styling—not attractiveness, body size, measurements, body type, weight, health, age, ethnicity, or body modification. Unsafe or malformed model output is replaced by a neutral styling fallback.
-
-## Transform endpoint
-
-### `POST /api/mirror/transform`
-
-Creates a visual outfit transformation after a user selects one of the analysis directions: `comfort`, `confidence`, or `experiment`.
-
-```powershell
-curl.exe -X POST http://localhost:3001/api/mirror/transform `
-  -H "Content-Type: application/json" `
-  -d "{\"image\":\"data:image/jpeg;base64,REPLACE_WITH_REAL_BASE64\",\"direction\":\"confidence\",\"changes\":[\"Add a structured outer layer\",\"Create clearer contrast between top and bottom\",\"Add one statement accessory\"]}"
-```
-
-The request accepts JPEG, PNG, and WebP images up to 6 MB decoded. `changes` must contain one to six non-empty styling changes from the prior analysis response.
 
 ```json
 {
-  "success": true,
-  "transformation": {
-    "direction": "confidence",
-    "image": "data:image/png;base64,...",
-    "changesApplied": ["Add a structured outer layer"],
-    "message": "Same you. Different styling."
-  },
-  "guardrails": { "bodyModified": false, "identityModified": false }
+  "image": "data:image/jpeg;base64,...",
+  "concern": "fit"
 }
 ```
 
-Gemini is instructed to preserve the person’s identity and body while modifying styling only. These guardrails declare the intended generation constraints; they are not a mathematical verification of identity or body preservation. Transformation errors return `TRANSFORMATION_FAILED`, and a 45-second provider timeout returns `AI_TIMEOUT`; the frontend can continue displaying the textual recommendations.
+Supported concerns are `fit`, `colors`, `silhouette`, `styling`, `something_off`, `dont_know`, and `body`. Supported image formats are JPEG, PNG, and WebP, with a decoded size limit of 6 MB. The response contains an analysis, three styling directions, and safety-guardrail flags.
 
+### Transform an outfit
 
-## Troubleshooting
+```http
+POST /api/mirror/transform
+Content-Type: application/json
+```
 
-- `AI_NOT_CONFIGURED`: set `GEMINI_API_KEY` in the server's `.env`, then restart the server.
-- `UNSUPPORTED_IMAGE_TYPE`: use `image/jpeg`, `image/png`, or `image/webp`.
-- `IMAGE_TOO_LARGE`: use an image no larger than 6 MB after base64 decoding.
-- Gemini provider failures intentionally return a safe fallback response so the frontend experience remains available; check server logs for the error name only.
+```json
+{
+  "image": "data:image/jpeg;base64,...",
+  "direction": "confidence",
+  "changes": ["Add one structured focal layer"]
+}
+```
+
+The response contains a base64 data URL for the transformed image and the changes applied.
+
+## Responsible AI and privacy
+
+WTF is designed to evaluate clothes, not people. Gemini is instructed never to estimate or criticize weight, measurements, body shape, age, ethnicity, health, attractiveness, or physical fitness. Generated text is validated against additional safety rules, and invalid analysis is replaced with a neutral styling fallback.
+
+Transformation prompts require Gemini to preserve the person’s identity, face, skin tone, hair, body proportions, pose, expression, environment, and camera framing while changing only clothing and styling. These guardrails express the product’s intended behavior; generative output should still be reviewed critically.
+
+Images are processed in memory and sent to Gemini for the requested operation. This project does not write uploaded photos to disk or log their contents.
+
+## Error handling
+
+| Code | Meaning |
+| --- | --- |
+| `INVALID_REQUEST` | The request is missing valid input |
+| `AI_NOT_CONFIGURED` | `GEMINI_API_KEY` is missing from the backend environment |
+| `AI_TIMEOUT` | Image transformation exceeded the provider timeout |
+| `TRANSFORMATION_FAILED` | Gemini did not return a usable transformed image |
+
+If `AI_NOT_CONFIGURED` appears, confirm the key is in `.env`—not `.env.example`—and fully restart the backend process.
+
+## Project structure
+
+```text
+fitsme.ai-/
+|-- public/                  Static assets
+|-- server/
+|   |-- gemini/              Analysis and transformation integrations
+|   |-- middleware/          Logging and error handling
+|   |-- routes/              API endpoints
+|   |-- services/            Safe fallback analysis
+|   |-- types/               API and domain types
+|   `-- utils/               Image parsing and application errors
+|-- src/
+|   |-- components/          Reusable interface components
+|   |-- hooks/               React hooks
+|   |-- lib/                 Shared frontend utilities
+|   `-- App.tsx              Main guided styling experience
+|-- .env.example             Safe environment-variable template
+|-- vite.config.ts           Vite configuration and API proxy
+`-- package.json             Dependencies and scripts
+```
+
+## Future improvements
+
+- Optional file upload when a camera is unavailable
+- Saved styling sessions with explicit user consent
+- Accessibility and cross-device camera testing
+- More granular styling controls before transformation
+- Automated API, safety, and end-to-end tests
+
+## Team
+
+Built for the GDG Hackathon. Add team-member names, roles, a live demo URL, and the final repository URL here before submission.
+
+## License
+
+This hackathon project does not currently declare an open-source license. Add a license before redistributing or accepting external contributions.

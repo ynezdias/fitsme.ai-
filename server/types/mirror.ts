@@ -35,8 +35,9 @@ export interface TransformResponse {
   transformation: {
     direction: StyleDirectionId;
     image: string;
+    generated: boolean;
     changesApplied: string[];
-    message: "Same you. Different styling.";
+    message: string;
   };
   guardrails: {
     bodyModified: false;

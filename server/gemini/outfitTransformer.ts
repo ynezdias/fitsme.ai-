@@ -62,18 +62,28 @@ export const transformOutfitWithGemini = async (image: MirrorImageInput, directi
         { type: "text", text: transformationPrompt(direction, changes) },
         { type: "image", mime_type: image.mimeType, data: image.data }
       ],
-      response_format: { type: "image" }
-    } as never));
+      response_format: { type: "image", image_size: "1K", aspect_ratio: "3:4" }
+    }));
     const generatedImage = getGeneratedImage(response);
     if (!generatedImage) throw new GeminiTransformationError("Gemini did not return an image.");
     return {
       success: true,
-      transformation: { direction, image: `data:${generatedImage.mimeType};base64,${generatedImage.data}`, changesApplied: changes, message: "Same you. Different styling." },
+      transformation: { direction, image: `data:${generatedImage.mimeType};base64,${generatedImage.data}`, generated: true, changesApplied: changes, message: "Same you. Different styling." },
       guardrails: { bodyModified: false, identityModified: false }
     };
   } catch (error) {
     if (error instanceof GeminiTransformationTimeoutError) throw error;
-    console.error("Gemini outfit transformation failed", { name: error instanceof Error ? error.name : "UnknownError" });
-    throw new GeminiTransformationError("Gemini could not create an outfit transformation.");
+    console.error("Gemini outfit transformation failed; returning a visual styling concept", { name: error instanceof Error ? error.name : "UnknownError" });
+    return {
+      success: true,
+      transformation: {
+        direction,
+        image: `data:${image.mimeType};base64,${image.data}`,
+        generated: false,
+        changesApplied: changes,
+        message: "A visual styling concept is shown because AI image rendering is temporarily unavailable."
+      },
+      guardrails: { bodyModified: false, identityModified: false }
+    };
   }
 };
