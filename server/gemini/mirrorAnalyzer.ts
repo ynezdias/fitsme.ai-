@@ -64,8 +64,9 @@ const parseAnalysis = (text: string): MirrorAnalysisResponse | null => {
       const item = observation as Record<string, unknown>;
       return observationCategories.includes(item.category as ObservationCategory) && isNonEmptyString(item.text);
     })) return null;
-    if (!value.styleDirections.every(isStyleDirection) || directionIds.some((id) => !value.styleDirections.some((direction) => (direction as StyleDirection).id === id))) return null;
-    const analysis: MirrorAnalysisResponse = { success: true, analysis: { summary: value.summary, observations: value.observations as GeminiMirrorAnalysis["observations"], reframe: value.reframe, bodyModificationSuggested: false }, styleDirections: value.styleDirections as StyleDirection[], guardrails: { bodyJudgment: false, bodyModification: false, weightEstimation: false } };
+    const styleDirections = value.styleDirections;
+    if (!styleDirections.every(isStyleDirection) || directionIds.some((id) => !styleDirections.some((direction: unknown) => (direction as StyleDirection).id === id))) return null;
+    const analysis: MirrorAnalysisResponse = { success: true, analysis: { summary: value.summary, observations: value.observations as GeminiMirrorAnalysis["observations"], reframe: value.reframe, bodyModificationSuggested: false }, styleDirections: styleDirections as StyleDirection[], guardrails: { bodyJudgment: false, bodyModification: false, weightEstimation: false } };
     return isSafeAnalysis(analysis) ? analysis : null;
   } catch { return null; }
 };

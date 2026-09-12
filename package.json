@@ -2,6 +2,7 @@
   "name": "wtf-what-the-fit",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Backend for WTF: WHAT THE FIT",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
