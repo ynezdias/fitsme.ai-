@@ -37,7 +37,9 @@ const concernPrompt = (concern: ConcernType): string => {
     dont_know: "Identify only observable styling opportunities in the outfit. Do not invent problems.",
     body: "The discomfort is being directed at the person's body. Begin by gently redirecting to styling variables: say the feeling may come from how the pieces interact, then analyze only outfit proportions, garment fit, colors, layering, accessories, and clothing-created silhouette. Never analyze the body."
   };
-  return `The selected concern is "${concern}". ${focus[concern]} Return only the requested JSON.`;
+  return `The selected concern is "${concern}". ${focus[concern]}
+
+Each of the three styleDirections must include at least one clearly visible styling addition in its changes array. Choose context-appropriate elements such as a scarf, necktie, earrings, necklace, belt, bag, brooch, hat, shoes, jacket, cardigan, or other layer. Do not assume gender and do not recommend every accessory at once. Make each direction visually distinct and realistic to generate as an edited image. Return only the requested JSON.`;
 };
 
 const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;

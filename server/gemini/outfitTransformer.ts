@@ -18,9 +18,13 @@ const transformationPrompt = (direction: StyleDirectionId, changes: string[]): s
 
 Edit the provided image by modifying ONLY the clothing, styling, accessories, layering, colors, or garment silhouette described below. Preserve the person completely.
 
+The edited result must look visibly different from the original at first glance. Add between one and three tasteful, clearly visible styling elements that support the selected direction. Appropriate examples include a scarf, necktie, earrings, necklace, belt, bag, brooch, hat, shoes, jacket, cardigan, or another clothing layer. Select only items that make sense with the existing outfit and framing; if ears, feet, waist, or hands are not visible, choose an element that can be seen naturally. Do not add all example items. Do not add duplicate accessories already present.
+
+Prioritize the user's requested styling changes. When a requested change is abstract, translate it into a concrete visible edit—for example, "create a focal point" can become a contrasting scarf, tie, necklace, brooch, belt, or structured outer layer. Keep additions photorealistic, correctly scaled, naturally positioned, and consistent with the image lighting and perspective.
+
 Do not change face, skin tone, hair, body size, body proportions, height, weight, pose, facial expression, age, identity, or physical features. Do not make the person thinner, larger, taller, shorter, younger, older, more muscular, or otherwise physically different. Do not reshape the person's body.
 
-The goal is not to improve the body. The goal is to show how different styling choices can change the feel of the outfit. Maintain photorealism. Keep the same person, pose, environment, camera perspective, and approximate framing where possible. Change only what is necessary to illustrate the styling recommendation.
+The goal is not to improve the body. The goal is to show how different styling choices can change the feel of the outfit. Maintain photorealism. Keep the same person, pose, environment, camera perspective, and exact framing where possible. The final image should be a believable styled version of the supplied photo, not a newly composed portrait.
 
 Selected direction: ${direction}
 Direction guidance: ${directionGuidance[direction]}
